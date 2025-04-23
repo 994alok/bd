@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -12,19 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/calculate")
-async def calculate(request: Request):
-    data = await request.json()
-    num1 = data.get("num1")
-    num2 = data.get("num2")
-    if num1 is None or num2 is None:
-        return {"result": "Invalid input"}
-    try:
-        result = float(num1) + float(num2)
-        return {"result": result}
-    except Exception:
-        return {"result": "Error occurred"}
+class Numbers(BaseModel):
+    num1: float
+    num2: float
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.post("/calculate")
+async def calculate(numbers: Numbers):
+    result = numbers.num1 + numbers.num2
+    return {"result": result}
